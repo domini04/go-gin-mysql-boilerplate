@@ -1,9 +1,11 @@
 package Routes
+
 import (
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
 	"go-gin-mysql-boilerplate/Controllers"
 	"go-gin-mysql-boilerplate/Middlewares"
+
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 )
 
 func SetupRouter() *gin.Engine {
@@ -17,6 +19,8 @@ func SetupRouter() *gin.Engine {
 
 	route.POST("auth/signin", Middlewares.IsClientAuthenticated, Controllers.AuthSignin)
 	route.DELETE("auth/signout", Middlewares.IsUserAuthenticated, Controllers.AuthSignout)
+	//route with "dog"
+	route.GET("dog", Middlewares.IsUserAuthenticated, Controllers.DogFetchAll)
 
 	route.GET("users", Middlewares.IsUserAuthenticated, Controllers.UserFetchAll)
 	route.GET("users/:id", Middlewares.IsUserAuthenticated, Controllers.UserFetchSingle)

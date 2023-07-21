@@ -1,12 +1,13 @@
 package Controllers
 
 import (
-	"github.com/gin-gonic/gin"
 	"go-gin-mysql-boilerplate/Models"
 	"go-gin-mysql-boilerplate/Models/Schema"
 	"go-gin-mysql-boilerplate/Services"
 	"go-gin-mysql-boilerplate/Validations"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 func UserFetchAll(c *gin.Context) {
@@ -76,4 +77,9 @@ func UserDelete(c *gin.Context) {
 	} else {
 		Services.Success(c, "Deleted", nil)
 	}
+}
+
+// Create DogFetchAll api that returns image from https://storage.googleapis.com/cdn-bucket-mz-finalproject/doge.jpg
+func DogFetchAll(c *gin.Context) {
+	Services.Success(c, nil, "https://storage.googleapis.com/cdn-bucket-mz-finalproject/doge.jpg")
 }
