@@ -7,16 +7,21 @@ import (
 	"go-gin-mysql-boilerplate/Validations"
 	"strings"
 
+	"os"
+
 	"github.com/gin-gonic/gin"
 )
 
+// changed the function to return the hostname in the response as the message
 func UserFetchAll(c *gin.Context) {
 	var user []Schema.User
+	//gets the hostname of the server
+	hostname := os.Getenv("HOSTNAME")
 	err := Models.UserFetchAll(&user)
 	if err != nil {
 		Services.NotAcceptable(c, "Something went wrong!", err)
 	} else {
-		Services.Success(c, nil, user)
+		Services.Success(c, hostname, user)
 	}
 }
 
