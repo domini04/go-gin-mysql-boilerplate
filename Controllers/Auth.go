@@ -1,15 +1,17 @@
 package Controllers
 
 import (
-	"github.com/gin-gonic/gin"
 	"go-gin-mysql-boilerplate/Models"
 	"go-gin-mysql-boilerplate/Models/Schema"
 	"go-gin-mysql-boilerplate/Services"
 	"go-gin-mysql-boilerplate/Validations"
 	"strconv"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
+// Receive email and password from the request body abd check if the user exists in the database
 func AuthSignin(c *gin.Context) {
 	var request Validations.AuthSignin
 	if requestErr := c.ShouldBind(&request); requestErr != nil {
@@ -31,7 +33,7 @@ func AuthSignin(c *gin.Context) {
 	}
 
 	clientName, _, _ := c.Request.BasicAuth()
-	tokens := Services.GenerateTokens(strconv.Itoa(int(emailUser.Id)),  clientName)
+	tokens := Services.GenerateTokens(strconv.Itoa(int(emailUser.Id)), clientName)
 
 	Services.Success(c, "Welcome!", gin.H{"userInfo": emailUser, "tokens": tokens})
 }

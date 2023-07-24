@@ -7,43 +7,44 @@ import (
 	"go-gin-mysql-boilerplate/Config"
 	"go-gin-mysql-boilerplate/Models"
 	"go-gin-mysql-boilerplate/Models/Schema"
-	"golang.org/x/crypto/bcrypt"
 	"strconv"
 	"time"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type accessToken struct {
-	Token interface{}
+	Token     interface{}
 	CreatedAt interface{}
 	ExpiredAt interface{}
 }
 
 type refreshToken struct {
-	Token interface{}
+	Token     interface{}
 	CreatedAt interface{}
 	ExpiredAt interface{}
 }
 
 type TokenResponse struct {
-	AccessToken accessToken
+	AccessToken  accessToken
 	RefreshToken refreshToken
 }
 
-
+// method to generate tokens
 func GenerateTokens(userId string, clientName string) TokenResponse {
-	tokenForAccess, errAccess := bcrypt.GenerateFromPassword([]byte("accessToken" + time.Now().String() + userId), bcrypt.DefaultCost)
+	tokenForAccess, errAccess := bcrypt.GenerateFromPassword([]byte("accessToken"+time.Now().String()+userId), bcrypt.DefaultCost)
 	if errAccess != nil {
 		panic(errAccess)
 	}
 
-	tokenForRefresh, errRefresh := bcrypt.GenerateFromPassword([]byte("refreshToken" + time.Now().String() + userId), bcrypt.DefaultCost)
+	tokenForRefresh, errRefresh := bcrypt.GenerateFromPassword([]byte("refreshToken"+time.Now().String()+userId), bcrypt.DefaultCost)
 	if errRefresh != nil {
 		panic(errRefresh)
 	}
 
 	tokens := TokenResponse{
 		AccessToken: accessToken{
-			Token: string(tokenForAccess),
+			Token:     string(tokenForAccess),
 			CreatedAt: time.Now().Format("2006-01-02 15:04:05"),
 			ExpiredAt: time.Now().Add(time.Hour * 24).Format("2006-01-02 15:04:05"),
 		},
@@ -55,7 +56,7 @@ func GenerateTokens(userId string, clientName string) TokenResponse {
 	}
 
 	var clientUser Schema.OAuthClient
-	if err := Config.DB.Raw("select * from o_auth_clients " +
+	if err := Config.DB.Raw("select * from o_auth_clients "+
 		"where name = ?", clientName).Scan(&clientUser).Error; err != nil {
 		return TokenResponse{}
 	}
@@ -63,12 +64,12 @@ func GenerateTokens(userId string, clientName string) TokenResponse {
 	intUserId, _ := strconv.Atoi(userId)
 
 	var saveAccessToken Schema.OAuthAccessToken
-	saveAccessToken.UserId 		= intUserId
-	saveAccessToken.ClientId	= int(clientUser.Id)
-	saveAccessToken.AccessToken	= fmt.Sprintf("%v", tokens.AccessToken.Token)
-	saveAccessToken.Revoked		= false
-	saveAccessToken.CreatedAt	= fmt.Sprintf("%v", tokens.AccessToken.CreatedAt)
-	saveAccessToken.ExpiredAt	= fmt.Sprintf("%v", tokens.AccessToken.ExpiredAt)
+	saveAccessToken.UserId = intUserId
+	saveAccessToken.ClientId = int(clientUser.Id)
+	saveAccessToken.AccessToken = fmt.Sprintf("%v", tokens.AccessToken.Token)
+	saveAccessToken.Revoked = false
+	saveAccessToken.CreatedAt = fmt.Sprintf("%v", tokens.AccessToken.CreatedAt)
+	saveAccessToken.ExpiredAt = fmt.Sprintf("%v", tokens.AccessToken.ExpiredAt)
 
 	saveAccessTokenErr := Models.AuthAccessTokenCreate(&saveAccessToken)
 	if saveAccessTokenErr != nil {
@@ -76,14 +77,14 @@ func GenerateTokens(userId string, clientName string) TokenResponse {
 	}
 
 	var saveRefreshToken Schema.OAuthRefreshToken
-	saveRefreshToken.UserId			= intUserId
-	saveRefreshToken.ClientId		= int(clientUser.Id)
-	saveRefreshToken.AccessTokenId 	= int(saveAccessToken.Id)
-	saveRefreshToken.AccessToken 	= saveAccessToken.AccessToken
-	saveRefreshToken.RefreshToken 	= fmt.Sprintf("%v", tokens.RefreshToken.Token)
-	saveRefreshToken.Revoked		= false
-	saveRefreshToken.CreatedAt		= fmt.Sprintf("%v", tokens.RefreshToken.CreatedAt)
-	saveRefreshToken.ExpiredAt		= fmt.Sprintf("%v", tokens.RefreshToken.ExpiredAt)
+	saveRefreshToken.UserId = intUserId
+	saveRefreshToken.ClientId = int(clientUser.Id)
+	saveRefreshToken.AccessTokenId = int(saveAccessToken.Id)
+	saveRefreshToken.AccessToken = saveAccessToken.AccessToken
+	saveRefreshToken.RefreshToken = fmt.Sprintf("%v", tokens.RefreshToken.Token)
+	saveRefreshToken.Revoked = false
+	saveRefreshToken.CreatedAt = fmt.Sprintf("%v", tokens.RefreshToken.CreatedAt)
+	saveRefreshToken.ExpiredAt = fmt.Sprintf("%v", tokens.RefreshToken.ExpiredAt)
 
 	saveRefreshTokenErr := Models.AuthRefreshTokenCreate(&saveRefreshToken)
 	if saveRefreshTokenErr != nil {
